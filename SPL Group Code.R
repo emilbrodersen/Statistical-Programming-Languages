@@ -1,5 +1,5 @@
 setwd("C:/HU/HU-S-3/SPL/project/bank")
-bankfull <- read.csv("bank-additional-full.csv", header = TRUE, sep = ";")
+bank <- read.csv("bank-additional-full.csv", header = TRUE, sep = ";")
 
 ##################################   cleaning dataset  ##############################
 ##  removing variable “duration”
@@ -15,50 +15,66 @@ sapply(bank, function(x) length(unique(x)))
 pMiss <- function(x){sum(is.na(x))/length(x)*100}
 apply(bank,2,pMiss)      # varialbe default has more than 20% missing
 #----------------------------------------------------------------------------------
+## predict structured missing value with Hmisc
+install.packages("Hmisc")
+library(Hmisc)
+#using argImpute
+levels(bank$job)[levels(bank$job)=='unknown'] <- NA
+levels(bank$marital)[levels(bank$marital)=='unknown'] <- NA
+levels(bank$education)[levels(bank$education)=='unknown'] <- NA
+levels(bank$housing)[levels(bank$housing)=='unknown'] <- NA
+levels(bank$loan)[levels(bank$loan)=='unknown'] <- NA
+levels(bank$default)[levels(bank$default)=='unknown'] <- NA
+impute_arg <- aregImpute(~ job + marital + education + default +
+                           housing + loan, data = bank, n.impute = 5)
+impute_arg
+impute_arg$imputed$default    #check imputed variable default
+# Conclusion: default has the following levels with < 5 observations: yes 
+# Consider using the group parameter to balance bootstrap samples 
+#----------------------------------------------------------------
+## predict missing value with missForest
+install.packages("missForest")
+library(missForest)
+bank.imp <- missForest(bank)
+bank.imp$ximp        #check imputed values
+bank.imp$OOBerror    #check imputation error
+# Conclusion: 19% error, which is not good
+#---------------------------------------------------------------
+## predict missing value with mi package
+install.packages("mi")
+library(mi)
+mi_data <- mi(iris.mis, seed = 335)
+summary(mi_data)
+# NOTE: The following pairs of variables appear to have the same missingness pattern.
+# Please verify whether they are in fact logically distinct variables.
+#----------------------------------------------------
 ## predict missing value with MICE package
 library(mice)
 md.pattern(bank)
-tempData <- mice(bank,m=5,maxit=50,meth='pmm',seed=500)
+install.packages("VIM")
+library(VIM)
+mice_plot <- aggr(bank, col=c('navyblue','yellow'),numbers=TRUE, sortVars=TRUE,
+                  labels=names(bank), cex.axis=.7, gap=3, 
+                  ylab=c("Missing data","Pattern"))
+tempData <- mice(bank,m=5,maxit=50,meth='polyreg',seed=500)
 summary(tempData)
 bankfull_NonNA <- complete(tempData,1)
+#-------------------------------------------------------------------------
+write.csv(bankfull_NonNA, "bankclean.csv")
+bankclean <-read.csv('bankclean.csv', sep = ',', header = TRUE)
+bankclean <- bankclean[,-1] 
+library(Hmisc)
+xyplot(bankclean,marital ~ job+housing+loan+education+default.R,pch=18,cex=1)
+densityplot(bankclean)
+stripplot(bankclean, pch = 20, cex = 1.2)
+modelFit1 <- with(tempData,lm(Temp~ Ozone+Solar.R+Wind))
+summary(pool(modelFit1))
 
 #################################   splitting data   ###############################
 set.seed(124)
-n <- nrow(bankfull_NonNA) 
+n <- nrow(bankclean) 
 sample.size <- ceiling(n*0.8) 
 idx.train <- sample(n, sample.size) 
-bank_train <- bankfull_NonNA[idx.train, ] 
-bank_test <-  bankfull_NonNA[-idx.train, ]
+bank_train <- bankclean[idx.train, ] 
+bank_test <-  bankclean[-idx.train, ]
 
-
-###########################  Questionablea: cleaning data method2   ####################
-## predict missing value in variable "marital"
-library(nnet)
-marital_train <- bank[which(bank$marital == "single"|bank$marital == "married"|
-                              bank$marital == "divorced"),]
-marital_test <- bank[which(is.na(bank$marital)),]
-marital_train$marital1<-relevel(marital_train$marital, ref = "divorced")
-marital_model <- multinom(marital1 ~age, data = marital_train)
-summary(marital_model)
-z <- summary(marital_model)$coefficients/summary(marital_model)$standard.errors
-p <- (1 - pnorm(abs(z), 0, 1))*2    
-exp(coef(marital_model))
-head(pp <- fitted(marital_model))
-predictMNL <- function(model, newdata) {
-  if (is.element("nnet",class(model))) {
-       probs <- predict(model,newdata,"probs")
-    cum.probs <- t(apply(probs,1,cumsum))
-        vals <- runif(nrow(newdata))
-        tmp <- cbind(cum.probs,vals)
-       k <- ncol(probs)
-    ids <- 1 + apply(tmp,1,function(x) length(which(x[1:k] < x[k+1])))
-       return(ids)
-  }
-}
-marital_test$y1 <- predictMNL(marital_model,marital_test)
-marital_test$marital<-NULL
-library(reshape)
-marital_test <- rename(marital_test, c(y1="marital"))
-marital_train$marital1<-NULL
-total <- rbind(marital_test, marital_train)
-#------------------------------------------------------------------------------------
