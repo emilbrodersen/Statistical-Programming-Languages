@@ -1,0 +1,182 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Formal Text-Rich Title Page
+% LaTeX Template
+% Version 1.0 (27/12/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Peter Wilson (herries.press@earthlink.net)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+% Instructions for using this template:
+% This title page compiles as is. If you wish to include this title page in
+% another document, you will need to copy everything before
+% \begin{document} into the preamble of your document. The title page is
+% then included using \titleGP within your document.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+\newcommand*{\plogo}{\fbox{$\mathcal{PL}$}} % Generic publisher logo
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\newcommand*{\titleGP}{\begingroup % Create the command for including the title page in the document
+\centering % Center all text
+\vspace*{\baselineskip} % White space at the top of the page
+
+\rule{\textwidth}{1.6pt}\vspace*{-\baselineskip}\vspace*{2pt} % Thick horizontal line
+\rule{\textwidth}{0.4pt}\\[\baselineskip] % Thin horizontal line
+
+{\LARGE Prediction Model Selection\\for\\[0.3\baselineskip] \ Bank Telemarketing}\\[0.2\baselineskip] % Title
+
+\rule{\textwidth}{0.4pt}\vspace*{-\baselineskip}\vspace{3.2pt} % Thin horizontal line
+\rule{\textwidth}{1.6pt}\\[\baselineskip] % Thick horizontal line
+
+\scshape % Small caps
+Report for Statistical Language Programming\\[\baselineskip] % Tagline(s) or further description
+
+\vspace*{2\baselineskip} % Whitespace between location/year and editors
+
+Edited by \\[\baselineskip]
+{\Large Yufang,Yan 579027\\Xun,Gong\\ Christoph,Linne \\Emil,Brodersen\par} % Editor list
+
+
+\vfill % Whitespace between editor names and publisher logo
+
+
+{\large Humboldt-Universitaet zu Berlin}\par % Publisher
+
+\endgroup}
+
+%----------------------------------------------------------------------------------------
+%	BLANK DOCUMENT
+%----------------------------------------------------------------------------------------
+
+\usepackage{fancyhdr}
+\usepackage{indentfirst}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[colorlinks,linkcolor=red]{hyperref}
+\usepackage{listings}
+\usepackage{natbib}
+\lstset{language=R}
+\lstset{breaklines}
+\begin{document}
+\pagestyle{empty} % Removes page numbers
+
+\titleGP % This command includes the title page
+
+    \newpage
+    \pagestyle{fancy}\lhead{Report for Statistical Language Programming}\rhead{Yan,Yufang Xun,Gong\\Christoph,Linne Emil,Brodersen}
+    \section{Introduction}
+
+    \noindent Nowadays, gigantic amounts of data are available. Therefore, companies in almost all kinds of industries engage in the exploitation of data to obtain competitive advantages over rivals\citep{provost2013data}.\\
+    The technological progress of computers and digitization of businesses makes corporations able to engage directly with customers, collecting and mining information about them, in order to tailor their products in a more optimal way\citep{rust2010rethinking}.\\ 
+    [\baselineskip]\indent
+    In particular, in the area of marketing the technologic developments enable a rethinking of marketing strategies by analyzing available data and customer metrics \citep{moro2014data}. \\
+    This is exactly what this paper will be aiming at. Optimizing the marketing efforts of the company using data mining.\\
+    In this paper, we focus on optimization models that increase company revenue by offering new products to existing customers. Models for data analysis are more suited for increasing revenue through existing customers than for acquiring new customers, because more information is available on the already existing customers \citep{nobibon2011optimization}. The knowledge of historical data allows the company to implement response models, to predict the probability that a customer will accept the offer of a certain product or service. In the retail banking industry, the banks have access to some of the richest datasets in the world of business \citep{nobibon2011optimization}. This should enable banks to target their marketing efforts towards customers that are more likely to accept the marketed products, which leads to lower marketing costs and increased profit.\\
+    In this paper, we study data related to a telemarketing campaign by a Portuguese Bank in the period of 2008-2010. Specifically we want to show that the bank can succesfully classify their customers as “accepters” or “decliners” of an offer made through a telemarketing campaign.\\
+    Several models can do such a classification task. In this paper, we use the Logistic Regression, Decision Trees, Random Forest and Neural Network.
+    The logistic regression and decision trees have the advantage that they make it easy to interpret which variables affect the classification probability. Random forest and neural network have the advantage that they can model highly complex nonlinear relations which tend to make these two models more accurate compared to the logistic regression and decision trees. However, due to the complexity of these models they are difficult to interpret and understand.\\
+    We fit all four models, and by using the AUC measure we conclude on which model does the most accurate predictions.
+     \\
+
+    \newpage
+    \pagestyle{fancy}\lhead{Report for Statistical Language Programming}\rhead{Yan,Yufang Christoph,Linne\\Xun,Gong Emil,Brodersen}
+    \section{Theory and Design}
+    
+      \subsection{Neural Network}
+    \noindent Neural Network models are mathematical models that are, loosely put, based on how the biological brain works \citep{baesens2003using}. This allows for highly complex nonlinear relationships between the input and the predicted variables. 
+    A neural network is a system of neurons. Each individual neuron is simple. It receives an input, process it and generates an output. Though each neuron is by itself simple, a network of neurons can produce very complex and intelligent calculations \citep{shiffman2012nature}. 
+    A neural network typically consists of three layers. An input layer, a hidden layer and an output layer. The need for only three layers is known as the universal approximation theorem and states that a neural network with three layers can approximate any continuous function to arbitrary degrees of accuracy \citep{hornik1989multilayer}.
+    \\
+    
+   
+    \subsection{Neural Network code}
+   \noindent The neural network can be trained in three different ways; supervised learning, unsupervised learning and reinforcement learning. Supervised learning can be used when one already has a dataset containing the answers to the question that we want to predict, and this is the training method that will be used in this paper.\\
+   The model attempts to predict outcomes, initiating this procedure with random weights. The errors of the predicted outcomes are then calculated and fed backwards through the model and used to update the weights. Through this process, the weights of the network are updated in such a way that the neurons recognise different patterns of the input space. This process continues until the weights have been optimally set or a maximum number of iterations have been reached. This process is called ‘backward propagation’. Backward propagation requires that the activation functions are differentiable. The standard approach is to use a sigmoid function such as a logit regression.\\
+   [\baselineskip]\indent To train the neural network model in R, we make use of the 'caret' package. We first use the 'trainControl' function to specify the options of the neural network algorithm.: 
+   \begin{lstlisting}[language=R,numbers=left, numberstyle=\normalsize]
+model.control<- trainControl(
+method = "cv", # 'cv' for cross validation
+number = 5, # number of folds in cross validation
+classProbs = TRUE, # Calculate class probabilities in each resample
+summaryFunction = twoClassSummary, # Compute sensitivity, specificity and AUC for each resample
+returnData = FALSE # The training data will not be included in the ouput training object
+)
+   \end{lstlisting}
+   \indent In line 2 we specify that we would like to train the model using cross validation, and in line 3 we specify how many folds we would like to use in the cross validation. By choosing five folds, we divide the data into 5 equally large subsets and leave one of them out. This is repeated for all five subsets. Line 4 and 5 specify that we would like to calculate class probabilities and sensitivity/specificity and AUC for all resamples. Line 6 specifies that we are not interested in saving the training data.\\
+   Next, we consider the parameters for the neural network.
+    \begin{lstlisting}[language=R,numbers=left, numberstyle=\normalsize]
+     nn.parms <- expand.grid(decay = c(0, 10^seq(-3, 0, 1)), size = seq(3,15,1))
+   \end{lstlisting}
+   
+   To choose the optimal parameters for our neural network, we define a grid of parameters that we would like to test. As previously described, the neural network needs two parameters to be specified, namely weight decay and number of nodes in the hidden layer. To choose the optimal values of the parameters, we use the function 'expand.grid' to specify a grid within which to search for optimal parameters. We specify that we would like to search for a weight decay of (0,001; 0,01; 0,1; 1) and a number of hidden nodes between three and fifteen. \\
+   [\baselineskip]\indent After having specified the options and the parameters we want to test, we initiate the training of the neural network.
+    \begin{lstlisting}[language=R,numbers=left, numberstyle=\normalsize]
+   nn <- train(y~., data = train,  
+   method = "nnet", 
+   maxit = 500, 
+   trace = FALSE, # options for nnet function
+   tuneGrid = nn.parms, # parameters to be tested
+   metric = "ROC", trControl = model.control)
+   \end{lstlisting}
+   In line 1 we specify that the variable we want to predict is 'y' and that we want to use all variables as explanatory variables. In line 5 we give the grid that we want to search for optimal parameters. In line 6 we give the options that we specified previously.
+   \\
+   
+   
+      \subsection{Neural Network Model}
+      \begin{itemize}
+      	\item \textbf{Input Description}
+      \end{itemize}
+      \noindent The neural network use all variables as input variables. The categorical variables have to be formatted as factors variables, thus inputting a dummy for each category. 
+      \\
+      \begin{itemize}
+      	\item \textbf{Expected Output}
+      \end{itemize}
+      As previously described, one of the disadvantages of a neural network model is that it is very difficult to interpret which variables influence the predicted probability. On the other hand we would expect that the model does well in terms of predictive accuracy. After having trained the model we can produce a ROC curve that shows the predictive performance in terms of specificity and sensitivity across all thresholds.\\   
+      \begin{itemize}
+      	\item \textbf{Actual Output}
+      \end{itemize}
+      \noindent After resampling across the grid of different parameters the best model in terms of achieved AUC is a model with thirteen nodes in the hidden layer and a weight decay of 1. This model achieves an AUC of approx. 0.92.\\
+      Setting a threshold of 0.50 gives the below confusion matrix.
+      \begin{figure}[htbp] 
+      	\centering
+      	\includegraphics[width=4.5in]{NN_ROC_plot.pdf} 
+      	\caption{ROC Curve of Neural Network}\label{fig:2} 
+      \end{figure}
+        \begin{center}
+  	\begin{table}[!htbp]
+  		\centering  
+  		\begin{tabular}{llc}
+  			\hline
+  			\hline\\[-1.8ex]
+  			& \multicolumn{2}{c}{True Outcome} \\
+  			\cline{2-3}\\[-1.8ex]
+  			Prediction & No & Yes \\
+  			\hline \\[-1.8ex] 
+  			No & 2622 & 519 \\ 
+  			\hline \\[-1.8ex] 
+  			Yes& 262 & 2386\\ 
+  			\hline
+  			\hline
+  		\end{tabular}  
+  		\caption{Confusion Matrix of Neural Network} 
+  	\end{table}
+  
+   
+\end{document}
